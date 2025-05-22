@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>凤凰单丛香型品鉴挑战</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2E7D32', // 主色调：茶绿色
+                        secondary: '#D4AF37', // 辅助色：金色
+                        neutral: '#F5F5DC', // 中性色：米白色
+                        dark: '#333333', // 深色文本
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .bg-tea-pattern {
+                background-image: url("https://picsum.photos/id/145/1000/1000");
+                background-size: cover;
+                background-position: center;
+                background-blend-mode: overlay;
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+            }
+            .scale-up {
+                animation: scaleUp 0.5s ease forwards;
+            }
+            @keyframes scaleUp {
+                from { transform: scale(0.8); opacity: 0; }
+                to { transform: scale(1); opacity: 1; }
+            }
+            .fade-in {
+                animation: fadeIn 0.6s ease forwards;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                20%, 60% { transform: translateX(-5px); }
+                40%, 80% { transform: translateX(5px); }
+            }
+            .number-card {
+                transition: all 0.3s ease;
+            }
+            .number-card:hover {
+                transform: scale(1.05);
+            }
+            .completed-card {
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+            .completed-card:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral min-h-screen font-sans text-dark">
+    <!-- 导航栏 -->
+    <nav class="bg-primary text-white shadow-lg fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-leaf text-secondary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold">凤凰单丛<span class="text-secondary">品鉴馆</span></h1>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#" class="hover:text-secondary transition-colors duration-300">首页</a>
+                <a href="#" class="hover:text-secondary transition-colors duration-300">香型介绍</a>
+                <a href="#" class="hover:text-secondary transition-colors duration-300">游戏规则</a>
+                <a href="#" class="hover:text-secondary transition-colors duration-300">排行榜</a>
+            </div>
+            <button class="md:hidden text-white text-xl" id="menuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+        <!-- 移动端菜单 -->
+        <div class="md:hidden hidden bg-primary/95 backdrop-blur-md" id="mobileMenu">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-3">
+                <a href="#" class="py-2 hover:text-secondary transition-colors duration-300">首页</a>
+                <a href="#" class="py-2 hover:text-secondary transition-colors duration-300">香型介绍</a>
+                <a href="#" class="py-2 hover:text-secondary transition-colors duration-300">游戏规则</a>
+                <a href="#" class="py-2 hover:text-secondary transition-colors duration-300">排行榜</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <!-- 游戏介绍 -->
+        <section class="mb-12 text-center fade-in">
+            <h2 class="text-[clamp(1.8rem,4vw,3rem)] font-bold text-primary mb-4">单丛香型盲盒挑战</h2>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8">
+                凤凰单丛，香型千变。选择编号，测试你的品鉴能力，解锁茶香秘境！
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button class="bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2" id="startGame">
+                    <i class="fa-solid fa-play-circle"></i> 开始挑战
+                </button>
+                <button class="bg-white hover:bg-gray-100 text-primary border-2 border-primary py-3 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2" id="howToPlay">
+                    <i class="fa-solid fa-info-circle"></i> 游戏规则
+                </button>
+            </div>
+        </section>
+
+        <!-- 编号选择区域 -->
+        <section id="numberSelection" class="hidden max-w-4xl mx-auto">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8" id="numberGrid">
+                <!-- 动态生成编号卡片 -->
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 fade-in" id="flavorChallenge">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-primary" id="selectedNumber">编号：--</h3>
+                    <div class="bg-primary/10 text-primary px-4 py-2 rounded-full font-medium">
+                        已完成：<span id="completedCount">0</span>/6
+                    </div>
+                </div>
+                
+                <div class="mb-6 text-center">
+                    <div class="w-full h-48 bg-gray-100 rounded-xl mb-4 overflow-hidden">
+                        <img src="https://picsum.photos/id/175/800/600" alt="茶样" class="w-full h-full object-cover scale-up" id="currentTeaImage">
+                    </div>
+                    <p class="text-lg mb-6">请品鉴这款茶样，然后输入您认为正确的香型名称：</p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" id="flavorInput" placeholder="请输入香型名称" 
+                            class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary transition-colors duration-300">
+                        <button id="submitAnswer" class="bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-lg shadow-lg transition-all duration-300">
+                            提交答案
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 结果弹窗 -->
+        <div id="resultModal" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm hidden fade-in">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6 scale-up">
+                <div class="text-center mb-6">
+                    <div id="resultIcon" class="inline-block text-6xl mb-4"></div>
+                    <h3 id="resultTitle" class="text-2xl font-bold mb-2"></h3>
+                    <p id="resultMessage" class="text-lg text-gray-600"></p>
+                </div>
+                <div id="flavorImageContainer" class="w-full h-64 rounded-xl overflow-hidden mb-6 hidden">
+                    <img id="flavorImage" src="" alt="" class="w-full h-full object-cover">
+                </div>
+                <div class="flex justify-center">
+                    <button id="closeResult" class="bg-primary hover:bg-primary/90 text-white py-3 px-8 rounded-lg shadow-lg transition-all duration-300">
+                        继续挑战
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 完成挑战区域 -->
+        <section id="challengeCompleted" class="hidden max-w-2xl mx-auto text-center fade-in">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="text-6xl text-secondary mb-4">🎉</div>
+                <h2 class="text-2xl md:text-3xl font-bold text-primary mb-4">恭喜您完成挑战！</h2>
+                <p class="text-lg mb-6">您已成功识别所有凤凰单丛香型，获得「单丛品鉴大师」称号！</p>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+                    <!-- 已解锁的香型缩略图 -->
+                    <div id="unlockedFlavors" class="col-span-full grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <!-- 动态生成已解锁的香型缩略图 -->
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button id="shareResult" class="bg-secondary hover:bg-secondary/90 text-white py-3 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2">
+                        <i class="fa-solid fa-share-alt"></i> 分享成绩
+                    </button>
+                    <button id="restartGame" class="bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2">
+                        <i class="fa-solid fa-redo"></i> 再次挑战
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 游戏规则模态框 -->
+        <div id="rulesModal" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm hidden fade-in">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 p-6 scale-up max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-primary">游戏规则</h3>
+                    <button id="closeRules" class="text-gray-500 hover:text-gray-700 text-xl">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <div class="space-y-4 text-lg">
+                    <p>1. 本游戏包含凤凰单丛六大经典香型：蜜兰香、鸭屎香、姜花香、大乌叶、锯朵仔、柚花香。</p>
+                    <p>2. 点击下方编号选择您要品鉴的茶样，输入对应的香型名称。</p>
+                    <p>3. 每猜对一款香型，即可解锁该香型的详细介绍和精美图片。</p>
+                    <p>4. 完成全部6款香型的挑战后，您将获得「单丛品鉴大师」称号，并可分享成绩到社交平台。</p>
+                    <p>5. 您可以随时点击右上角"排行榜"查看其他茶友的成绩。</p>
+                    <div class="mt-6 bg-primary/5 p-4 rounded-lg">
+                        <h4 class="font-bold text-primary mb-2">香型知识小课堂</h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>蜜兰香：兰香清幽，滋味醇厚，回甘带蜜韵</li>
+                            <li>鸭屎香：花香高锐，茶味浓烈，回甘迅猛</li>
+                            <li>姜花香：香气似姜花，滋味甘滑，微带姜韵</li>
+                            <li>大乌叶：叶色深绿，香气浓郁，滋味厚重</li>
+                            <li>锯朵仔：叶边呈锯齿状，蜜香清幽，回甘力强</li>
+                            <li>柚花香：香气似柚子花，滋味清爽，喉韵甘润</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="startFromRules" class="bg-primary hover:bg-primary/90 text-white py-3 px-8 rounded-lg shadow-lg transition-all duration-300">
+                        开始挑战
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-primary text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fa-solid fa-leaf text-secondary text-2xl"></i>
+                        <h3 class="text-xl font-bold">凤凰单丛品鉴馆</h3>
+                    </div>
+                    <p class="text-gray-200 mb-4">探索凤凰单丛的香型奥秘，感受千年茶文化的独特魅力。</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-200 hover:text-secondary transition-colors duration-300">
+                            <i class="fa-brands fa-weixin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-200 hover:text-secondary transition-colors duration-300">
+                            <i class="fa-brands fa-weibo text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-200 hover:text-secondary transition-colors duration-300">
+                            <i class="fa-brands fa-instagram text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">快速链接</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-200 hover:text-secondary transition-colors duration-300">首页</a></li>
+                        <li><a href="#" class="text-gray-200 hover:text-secondary transition-colors duration-300">香型介绍</a></li>
+                        <li><a href="#" class="text-gray-200 hover:text-secondary transition-colors duration-300">关于我们</a></li>
+                        <li><a href="#" class="text-gray-200 hover:text-secondary transition-colors duration-300">购买茶叶</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">联系我们</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-start space-x-3">
+                            <i class="fa-solid fa-map-marker-alt mt-1"></i>
+                            <span class="text-gray-200">广东省潮州市凤凰镇茶文化街88号</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fa-solid fa-phone"></i>
+                            <span class="text-gray-200">400-888-8888</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fa-solid fa-envelope"></i>
+                            <span class="text-gray-200">info@fenghuangtea.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p>&copy; 2025 凤凰单丛品鉴馆. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 香型数据
+        const flavorData = [
+            {
+                id: 1,
+                name: "蜜兰香",
+                image: "https://picsum.photos/id/106/800/600",
+                description: "兰香清幽，滋味醇厚，回甘带蜜韵",
+                thumbnail: "https://picsum.photos/id/106/200/200"
+            },
+            {
+                id: 2,
+                name: "鸭屎香",
+                image: "https://picsum.photos/id/175/800/600",
+                description: "花香高锐，茶味浓烈，回甘迅猛",
+                thumbnail: "https://picsum.photos/id/175/200/200"
+            },
+            {
+                id: 3,
+                name: "姜花香",
+                image: "https://picsum.photos/id/110/800/600",
+                description: "香气似姜花，滋味甘滑，微带姜韵",
+                thumbnail: "https://picsum.photos/id/110/200/200"
+            },
+            {
+                id: 4,
+                name: "大乌叶",
+                image: "https://picsum.photos/id/112/800/600",
+                description: "叶色深绿，香气浓郁，滋味厚重",
+                thumbnail: "https://picsum.photos/id/112/200/200"
+            },
+            {
+                id: 5,
+                name: "锯朵仔",
+                image: "https://picsum.photos/id/122/800/600",
+                description: "叶边呈锯齿状，蜜香清幽，回甘力强",
+                thumbnail: "https://picsum.photos/id/122/200/200"
+            },
+            {
+                id: 6,
+                name: "柚花香",
+                image: "https://picsum.photos/id/133/800/600",
+                description: "香气似柚子花，滋味清爽，喉韵甘润",
+                thumbnail: "https://picsum.photos/id/133/200/200"
+            }
+        ];
+
+        // 游戏状态
+        let gameState = {
+            selectedFlavorId: null,
+            completedFlavors: [],
+        };
+
+        // DOM 元素
+        const navbar = document.getElementById('navbar');
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const startGameBtn = document.getElementById('startGame');
+        const howToPlayBtn = document.getElementById('howToPlay');
+        const numberSelection = document.getElementById('numberSelection');
+        const numberGrid = document.getElementById('numberGrid');
+        const flavorChallenge = document.getElementById('flavorChallenge');
+        const selectedNumber = document.getElementById('selectedNumber');
+        const currentTeaImage = document.getElementById('currentTeaImage');
+        const flavorInput = document.getElementById('flavorInput');
+        const submitAnswerBtn = document.getElementById('submitAnswer');
+        const resultModal = document.getElementById('resultModal');
+        const resultIcon = document.getElementById('resultIcon');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultMessage = document.getElementById('resultMessage');
+        const flavorImageContainer = document.getElementById('flavorImageContainer');
+        const flavorImage = document.getElementById('flavorImage');
+        const closeResultBtn = document.getElementById('closeResult');
+        const challengeCompleted = document.getElementById('challengeCompleted');
+        const unlockedFlavors = document.getElementById('unlockedFlavors');
+        const shareResultBtn = document.getElementById('shareResult');
+        const restartGameBtn = document.getElementById('restartGame');
+        const rulesModal = document.getElementById('rulesModal');
+        const closeRulesBtn = document.getElementById('closeRules');
+        const startFromRulesBtn = document.getElementById('startFromRules');
+        const completedCount = document.getElementById('completedCount');
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavbarScroll();
+            initMenuToggle();
+            initEventListeners();
+        });
+
+        // 导航栏滚动效果
+        function initNavbarScroll() {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    navbar.classList.add('py-2', 'shadow-xl');
+                    navbar.classList.remove('py-3', 'shadow-lg');
+                } else {
+                    navbar.classList.add('py-3', 'shadow-lg');
+                    navbar.classList.remove('py-2', 'shadow-xl');
+                }
+            });
+        }
+
+        // 移动端菜单切换
+        function initMenuToggle() {
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                if (mobileMenu.classList.contains('hidden')) {
+                    menuToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+                } else {
+                    menuToggle.innerHTML = '<i class="fa-solid fa-times"></i>';
+                }
+            });
+        }
+
+        // 初始化事件监听器
+        function initEventListeners() {
+            startGameBtn.addEventListener('click', startGame);
+            howToPlayBtn.addEventListener('click', showRules);
+            closeRulesBtn.addEventListener('click', hideRules);
+            startFromRulesBtn.addEventListener('click', () => {
+                hideRules();
+                startGame();
+            });
+            submitAnswerBtn.addEventListener('click', checkAnswer);
+            flavorInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+            closeResultBtn.addEventListener('click', closeResult);
+            shareResultBtn.addEventListener('click', shareResult);
+            restartGameBtn.addEventListener('click', restartGame);
+        }
+
+        // 开始游戏
+        function startGame() {
+            gameState.completedFlavors = [];
+            flavorChallenge.classList.add('hidden');
+            
+            document.querySelector('#numberSelection').classList.remove('hidden');
+            document.querySelector('#challengeCompleted').classList.add('hidden');
+            
+            renderNumberCards();
+            updateCompletedCount();
+        }
+
+        // 渲染编号卡片
+        function renderNumberCards() {
+            numberGrid.innerHTML = '';
+            
+            flavorData.forEach(flavor => {
+                const isCompleted = gameState.completedFlavors.includes(flavor.id);
+                const card = document.createElement('div');
+                card.className = `number-card bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer ${
+                    isCompleted ? 'completed-card' : ''
+                }`;
+                card.innerHTML = `
+                    <div class="text-4xl font-bold text-primary mb-2">${flavor.id}</div>
+                    <div class="text-gray-500">
+                        ${isCompleted ? '<i class="fa-solid fa-check-circle text-green-500"></i> 已完成' : '点击选择'}
+                    </div>
+                `;
+                
+                if (!isCompleted) {
+                    card.addEventListener('click', () => selectFlavor(flavor.id));
+                }
+                
+                numberGrid.appendChild(card);
+            });
+        }
+
+        // 选择香型
+        function selectFlavor(flavorId) {
+            if (gameState.completedFlavors.includes(flavorId)) return;
+            
+            gameState.selectedFlavorId = flavorId;
+            const flavor = flavorData.find(f => f.id === flavorId);
+            
+            if (!flavor) return;
+            
+            selectedNumber.textContent = `编号：${flavor.id}号`;
+            currentTeaImage.src = flavor.image;
+            currentTeaImage.alt = flavor.name;
+            flavorInput.value = '';
+            
+            flavorChallenge.classList.remove('hidden');
+            flavorInput.focus();
+        }
+
+        // 检查答案
+        function checkAnswer() {
+            const userAnswer = flavorInput.value.trim();
+            const selectedFlavor = flavorData.find(f => f.id === gameState.selectedFlavorId);
+            
+            if (!selectedFlavor) return;
+            
+            if (userAnswer === '') {
+                flavorInput.classList.add('shake', 'border-red-500');
+                setTimeout(() => {
+                    flavorInput.classList.remove('shake', 'border-red-500');
+                }, 500);
+                return;
+            }
+            
+            // 答案正确
+            if (userAnswer === selectedFlavor.name) {
+                gameState.completedFlavors.push(selectedFlavor.id);
+                
+                resultIcon.className = 'inline-block text-6xl mb-4 text-green-500';
+                resultIcon.innerHTML = '✅';
+                resultTitle.textContent = '恭喜您！';
+                resultTitle.className = 'text-2xl font-bold mb-2 text-green-600';
+                resultMessage.textContent = `您已成功识别 ${selectedFlavor.name}！`;
+                
+                flavorImageContainer.classList.remove('hidden');
+                flavorImage.src = selectedFlavor.image;
+                flavorImage.alt = selectedFlavor.name;
+            } 
+            // 答案错误
+            else {
+                resultIcon.className = 'inline-block text-6xl mb-4 text-red-500';
+                resultIcon.innerHTML = '❌';
+                resultTitle.textContent = '再试一次！';
+                resultTitle.className = 'text-2xl font-bold mb-2 text-red-600';
+                resultMessage.textContent = `正确答案是：${selectedFlavor.name}。`;
+                
+                flavorImageContainer.classList.remove('hidden');
+                flavorImage.src = selectedFlavor.image;
+                flavorImage.alt = selectedFlavor.name;
+            }
+            
+            resultModal.classList.remove('hidden');
+        }
+
+        // 关闭结果弹窗
+        function closeResult() {
+            resultModal.classList.add('hidden');
+            flavorChallenge.classList.add('hidden');
+            
+            updateCompletedCount();
+            renderNumberCards();
+            
+            // 如果完成了所有香型，显示完成页面
+            if (gameState.completedFlavors.length === flavorData.length) {
+                setTimeout(() => {
+                    numberSelection.classList.add('hidden');
+                    challengeCompleted.classList.remove('hidden');
+                    renderUnlockedFlavors();
+                }, 300);
+            }
+        }
+
+        // 更新已完成数量
+        function updateCompletedCount() {
+            completedCount.textContent = gameState.completedFlavors.length;
+        }
+
+        // 渲染已解锁的香型
+        function renderUnlockedFlavors() {
+            unlockedFlavors.innerHTML = '';
+            
+            gameState.completedFlavors.forEach(flavorId => {
+                const flavor = flavorData.find(f => f.id === flavorId);
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-md overflow-hidden fade-in';
+                card.innerHTML = `
+                    <div class="h-32 overflow-hidden">
+                        <img src="${flavor.thumbnail}" alt="${flavor.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-3 text-center">
+                        <h4 class="font-bold text-primary">${flavor.name}</h4>
+                        <p class="text-sm text-gray-600">${flavor.description}</p>
+                    </div>
+                `;
+                unlockedFlavors.appendChild(card);
+            });
+        }
+
+        // 分享结果
+        function shareResult() {
+            alert('分享功能已触发！在实际应用中，这里会连接到社交媒体API。');
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            challengeCompleted.classList.add('hidden');
+            startGame();
+        }
+
+        // 显示游戏规则
+        function showRules() {
+            rulesModal.classList.remove('hidden');
+        }
+
+        // 隐藏游戏规则
+        function hideRules() {
+            rulesModal.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
+    
